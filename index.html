@@ -1,29 +1,148 @@
-<!--bienvenue-->
-
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Accueil</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Tir</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f06, #f79);
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            cursor: url('https://www.w3schools.com/css/green_pointer.png'), auto;
+        }
+
+    
+        #info {
+            margin-top: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+        #info p {
+            margin: 5px 0;
+            font-size: 1.2em;
+        }
+        #info span {
+            font-weight: bold;
+        }
+        #gameArea {
+            position: relative;
+            width: 99%;
+            max-width: 600px;
+            height: 60vh;
+            max-height: 90%;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .target {
+            position: absolute;
+            width: 10%;
+            height: 10%;
+            max-width: 50px;
+            max-height: 50px;
+            background-color: #00ff15;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .target:active {
+            transform: scale(1.2);
+        }
+        
+        
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Accueil</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="index.html">Accueil</a></li>
-            <li><a href="page1.html">Page 1</a></li>
-            <li><a href="page2.html">Page 2</a></li>
-            <li><a href="page3.html">Page 3</a></li>
-        </ul>
-    </nav>
-    <section>
-        <h2>Bienvenue</h2>
-        <p>Bienvenue sur ce site web.</p>
-    </section>
-    <footer>
-        <p>&copy; 2021 - Tous droits réservés</p>
-    </footer>
+
+    <div id="info">
+        <p>Flop pas chef: <span id="level">1</span></p>
+        <p>Temps restant: <span id="timer">5</span>s</p>
+        <p>Score: <span id="score">0</span></p>
+    </div>
+    <div id="gameArea">
+        <div id="target" class="target"></div>
+    </div>
+    
+
+    <script>
+        const target = document.getElementById('target');
+        const gameArea = document.getElementById('gameArea');
+        const levelDisplay = document.getElementById('level');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+
+        let level = 1;
+        let score = 0;
+        let timeRemaining = 5;
+        let gameInterval;
+
+        function startGame() {
+            level = 1;
+            score = 0;
+            timeRemaining = 5;
+            levelDisplay.textContent = level;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeRemaining;
+            moveTarget();
+            gameInterval = setInterval(updateTimer, 1000);
+        }
+
+        function moveTarget() {
+            const maxX = gameArea.clientWidth - target.clientWidth;
+            const maxY = gameArea.clientHeight - target.clientHeight;
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+            target.style.left = `${randomX}px`;
+            target.style.top = `${randomY}px`;
+        }
+
+        function updateTimer() {
+            timeRemaining--;
+            timerDisplay.textContent = timeRemaining;
+            if (timeRemaining <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            alert(`Jeu terminé! Votre score est de ${score}. Cliquez pour recommencer.`);
+            document.body.addEventListener('click', restartGame, { once: true });
+        }
+
+        function restartGame() {
+            document.body.removeEventListener('click', restartGame);
+            startGame();
+        }
+
+        target.addEventListener('click', () => {
+            score++;
+            scoreDisplay.textContent = score;
+            if (score >= 10) {
+                window.location.href = "bravo.html";
+            }
+            if (level < 10) {
+                level++;
+                levelDisplay.textContent = level;
+                timeRemaining = 5 - level * 0.5;
+                timerDisplay.textContent = timeRemaining;
+                moveTarget();
+            } else {
+                endGame();
+            }
+        });
+
+        startGame();
+    </script>
+</body>
 </html>
