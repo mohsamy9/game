@@ -1,157 +1,68 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de golmon v1.1</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #f06, #f79);
-            font-family: 'Roboto', sans-serif;
-            color: #fff;
-            cursor: url('https://www.w3schools.com/css/green_pointer.png'), auto;
-        }
-        #info {
-            margin-top: 20px;
-            text-align: center;
-            width: 90%;
-            max-width: 600px;
-        }
-        #info p {
-            margin: 5px 0;
-            font-size: 1.2em;
-        }
-        #info span {
-            font-weight: bold;
-        }
-        #gameArea {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 60vh;
-            max-height: 90%;
-            border: 2px solid #fff;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        .target {
-            position: absolute;
-            width: 10%;
-            height: 10%;
-            max-width: 50px;
-            max-height: 50px;
-            background-color: #15ff00;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .target:active {
-            transform: scale(1.2);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nouvelle République</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
-    <div id="info">
-        <p>Niveau: <span id="level">1</span></p>
-        <p>Temps restant: <span id="timer">5</span>s</p>
-        <p>Score: <span id="score">0</span></p>
+    <h1><span style="color: red;">⚒️ Macron Révolution ⚒️</span></h1>
+    
+    
+    
+  <div class="container">
+    <div class="stats">
+      <div class="hero">
+        <h3>Jean Moulin 2.0</h3>
+        <img src="assets/images/hero.png" alt="Hero" class="sprite" id="hero-sprite"/>
+        <div id="hero-hp">HP: 100/100</div>
+        <div class="hp-bar"><div id="hero-hp-fill" class="hp-fill"></div></div>
+      </div>
+      <div class="monster">
+        <h3 id="monster-name">👾 Monstre</h3>
+        <img src="assets/images/monster1.png" alt="Monster" class="sprite" id="monster-sprite"/>
+        <div id="monster-hp">HP: 100/100</div>
+        <div class="hp-bar"><div id="monster-hp-fill" class="hp-fill"></div></div>
+      </div>
     </div>
-    <div id="gameArea">
-        <div id="target" class="target"></div>
+
+    <div id="inventory">
+        <h2>🍷 Bouteilles de Rouge : <span id="red-wine-count">3</span></h2>
+      </div>
+      
+      
+      
+      
+
+    <div class="xp-bar-container">
+        <div id="xp-bar" class="xp-bar"></div>
+      </div>
+      <p id="xp-text">XP: 0 / 100</p>
+
+      
+
+      
+
+    <div class="actions">
+        <button id="attack-btn">🧱 Lancer de Pavé</button>
+        <button id="molotovButton">Cocktail Molotov</button>
+
+        <button id="defend-btn">🏥 Arrêt Maladie</button>
+        <button id="heal-btn">🍷 Bouteille de Rouge</button>
+        <button id="next-btn" style="display:none">➡️ Prochain Combat</button>
+        
     </div>
 
-    <script>
-        const target = document.getElementById('target');
-        const gameArea = document.getElementById('gameArea');
-        const levelDisplay = document.getElementById('level');
-        const timerDisplay = document.getElementById('timer');
-        const scoreDisplay = document.getElementById('score');
+    <div class="log" id="log">
+      <p>Le combat commence !</p>
+    </div>
+  </div>
 
-        let level = 1;
-        let score = 0;
-        let timeRemaining = 5;
-        let gameInterval;
-
-        function startGame() {
-            level = 1;
-            score = 0;
-            timeRemaining = 5;
-            levelDisplay.textContent = level;
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = timeRemaining;
-            moveTarget();
-            gameInterval = setInterval(updateTimer, 1000);
-        }
-
-        function moveTarget() {
-            const maxX = gameArea.clientWidth - target.clientWidth;
-            const maxY = gameArea.clientHeight - target.clientHeight;
-            const randomX = Math.floor(Math.random() * maxX);
-            const randomY = Math.floor(Math.random() * maxY);
-            target.style.left = `${randomX}px`;
-            target.style.top = `${randomY}px`;
-        }
-
-        function updateTimer() {
-            timeRemaining--;
-            timerDisplay.textContent = timeRemaining;
-            if (timeRemaining <= 0) {
-                endGame();
-                if (score === 9) {
-                    restartGame();
-                }
-            }
-        }
-
-        function endGame() {
-            clearInterval(gameInterval);
-            alert(`Jeu terminé! Votre score est de ${score}. Cliquez pour recommencer.`);
-            document.body.addEventListener('click', restartGame, { once: true });
-        }
-
-        function restartGame() {
-            document.body.removeEventListener('click', restartGame);
-            startGame();
-        }
-
-        target.addEventListener('click', () => {
-            score++;
-            scoreDisplay.textContent = score;
-            if (score >= 10) {
-                window.location.href = "bravo.html";
-            }
-
-
-            
-            
-            
-            if (score < 10) {
-                
-                if (level < 10) {
-                    level++;
-                    levelDisplay.textContent = level;
-                    timeRemaining = 5 - level * 0.444;
-                    timerDisplay.textContent = timeRemaining;
-                    moveTarget();
-                } else {
-                    endGame();
-                    if (score === 9) {
-                        restartGame();
-                    }
-                    
-                }
-            }
-        });
-
-        startGame();
-    </script>
+  <audio id="bg-music" src="assets/sounds/music.mp3" loop autoplay></audio>
+  <script src="js/game.js"></script>
 </body>
 </html>
