@@ -26,7 +26,9 @@ let blockFrames = [];
 let deathFrames = [];
 let currentFrame = 0;
 let frameInterval = null;
-let redWineCount = 3; // Commence avec 3 bouteilles
+let redWineCount = 3;
+let defenseTurnsLeft = 0;
+let isGameOver = false;
 updateRedWineDisplay();
 
 function updateRedWineDisplay() {
@@ -81,20 +83,59 @@ function initGame() {
 // =======================
 
 function lancerDePave() {
-  const damage = hero.attack;
-  monster.hp -= damage;
-  addLog(`🧱 Tu lances un pavé sur ${monster.name} ! -${damage} HP !`);
+  if (isGameOver) return;
 
-  // Chance de loot une bouteille de rouge
-  if (Math.random() < 0.3) {
-    redWineCount++;
-    addLog(`🍷 Tu récupères une bouteille de vin rouge ! (${redWineCount} en stock)`);
+  // Ratio de vie (entre 0 et 1)
+  let hpRatio = hero.hp / hero.maxHp;
+
+  // Bonus de dégâts aléatoire : entre 0 et 50%, boosté si PV bas
+  let bonusMultiplier = 0.5 + (1 - hpRatio) * 0.5; // Va de 0.5 (PV hauts) à 1 (PV bas)
+  let randomBonusPercent = Math.random() * bonusMultiplier;
+
+  // Dégâts de base avec le bonus random appliqué
+  let baseDamage = Math.floor(hero.attack * (1 + randomBonusPercent));
+
+  let damage = baseDamage;
+
+  // Coup critique (double les dégâts)
+  let isCrit = Math.random() < 0.2; // 20% de chance
+  if (isCrit) {
+    damage *= 2;
+    addLog(`💥 Révolte enflammée ! Pavé magistral lancé sur ${monster.name}, -${damage} HP !`);
+  } else {
+    addLog(`🧱 Pavé lancé sur ${monster.name}, -${damage} HP !`);
   }
 
+  // Appliquer les dégâts au monstre
+  monster.hp -= damage;
+
+  // Vérifier si le monstre est vaincu
+  if (monster.hp <= 0) {
+    monster.hp = 0;
+    updateUI();
+    victory();
+    return;
+  }
+
+  // Chance de récupérer une Bouteille de Rouge
+  if (Math.random() < 0.3) {
+    redWineCount++;
+    addLog(`🍷 Bouteille de Rouge ramassée sur le champ de bataille ! (${redWineCount})`);
+    updateRedWineDisplay();
+  }
+
+  // Mettre à jour l'interface
+  updateUI();
+
+  // Fin du tour
   endTurn();
 }
 
+
+
 function cocktailMolotov() {
+  if (isGameOver) return;
+
   const damage = hero.attack * 2;
 
   if (redWineCount <= 0) {
@@ -102,47 +143,84 @@ function cocktailMolotov() {
     return;
   }
 
-  // Consomme une bouteille de rouge pour faire le molotov
   redWineCount--;
-  updateRedWineDisplay();
-
-  // Inflige les dégâts au monstre
+  updateRedWineDisplay(); // Ajout ici
   monster.hp -= damage;
   addLog(`🔥 Tu balances un cocktail molotov sur ${monster.name} ! -${damage} HP !`);
 
-  // 30% de chance de récupérer une bouteille après le lancer
-  if (Math.random() < 0.4) {
+  playMolotovAnimation();
+
+  if (Math.random() < 0.3) {
     redWineCount++;
-    addLog(`🍷 Tu récupères une Bouteille de Rouge sur le terrain !`);
-    updateRedWineDisplay();
+    updateRedWineDisplay(); // Ajout ici
+    addLog(`🍷 Une Bouteille de Rouge est récupérée !`);
   }
 
+  updateUI();
   endTurn();
 }
 
 
+
 function arretMaladie() {
+  if (isGameOver) return;
+
   hero.defending = true;
-  addLog(`🏥 Tu prends un arrêt maladie. Prochaine attaque subie réduite !`);
+
+  // Randomisation : durée entre 1 et 3 tours
+  defenseTurnsLeft = Math.floor(Math.random() * 3) + 1;
+
+  // Bonus temporaire : la défense est boostée selon la durée
+  const defenseBoost = defenseTurnsLeft * 2; // +2 défense par tour d'arrêt
+  hero.defense += defenseBoost;
+
+  addLog(`🏥 Tu es en arrêt maladie pendant ${defenseTurnsLeft} tours ! Tu gagnes +${defenseBoost} en défense. Planqué chez toi avec Netflix et ta carte Vitale...`);
+
+  // Animation / son (optionnel)
+  sounds.defend.play();
+  playBlockAnimation();
+
   endTurn();
 }
 
 function bouteilleDeRouge() {
+  if (isGameOver) return;
+  
   if (redWineCount <= 0) {
     addLog(`🚫 Plus de Bouteilles de Rouge pour te soigner !`);
     return;
   }
 
-  playBlockAnimation();  // Animation de défense ou de soin si tu veux
-  const healAmount = 40;
-  hero.hp = Math.min(hero.maxHp, hero.hp + healAmount);
-  redWineCount--; // Consomme une bouteille
-
-  addLog(`🍷 Tu bois une bouteille de rouge et récupères ${healAmount} HP !`);
+  // Décrémentation correcte
+  redWineCount--;
   updateRedWineDisplay();
+
+  // Calcul du soin : 30 PV de base + variation aléatoire (0-20)
+  const baseHeal = 30;
+  const randomBonus = Math.floor(Math.random() * 21); // 0 à 20
+  const totalHeal = baseHeal + randomBonus;
+
+  // Application du soin avec limite max
+  hero.hp = Math.min(hero.maxHp, hero.hp + totalHeal);
   
+  // Bonus de défense si HP étaient bas
+  if (hero.hp / hero.maxHp < 0.3) {
+    totalHeal += 10;
+    addLog(`💪 Sursaut révolutionnaire ! +10 PV bonus !`);
+  }
+
+  // Animation temporaire (remplacer par animation de soin si disponible)
+  playBlockAnimation();
+  sounds.potion.play();
+
+  // Message avec le total soigné
+  addLog(`🍷 Soin réussi ! (+${totalHeal} PV) Il reste ${redWineCount} bouteilles`);
+
+  // Mise à jour interface et fin de tour
+  updateUI();
   endTurn();
 }
+
 
 
 // =======================
@@ -152,115 +230,169 @@ function bouteilleDeRouge() {
 function endTurn() {
   updateUI();
 
+  if (isGameOver) return;  // Ajout ici pour bloquer les tours
+  
   if (monster.hp <= 0) {
     sounds.win.play();
-    gainXP(50);
-
-    score++;
-    localStorage.setItem('rpgScore', score);
-
-    addLog(`🏆 Tu as vaincu ${currentMonster.name} ! Score : ${score}`);
-
-    disableButtons();
-    nextBtn.style.display = 'inline-block';
+    victory();
     return;
   }
 
-  setTimeout(monsterAttack, 500);
+  setTimeout(() => {
+    if (!isGameOver) monsterAttack();
+  }, 500);
 }
 
+
 function monsterAttack() {
+  if (isGameOver) return;
+
   const attackOptions = [
     {
       name: "Prélèvement à la source",
-      damage: 20,
+      baseDamage: 18,
       img: "macron1.png",
-      effect: () => addLog("💸 Macron te ponctionne directement sur ton salaire !")
+      effect: () => {
+        addLog("💸 Macron te ponctionne directement sur ton salaire !");
+      },
+      getDamage: () => {
+        // Peut faire 10 à 30% de dégâts en plus selon ton nombre de bouteilles
+        let bonus = redWineCount > 5 ? 1.3 : 1.1;
+        return Math.floor(20 * bonus);
+      }
     },
     {
       name: "Réforme des retraites",
-      damage: 15,
+      baseDamage: 15,
       img: "macron2.png",
       effect: () => {
         hero.defense = Math.max(0, hero.defense - 2);
-        addLog("📉 Ta défense baisse à cause de la réforme !");
+        addLog("📉 Ta défense est réduite à cause de la réforme !");
+      },
+      getDamage: () => {
+        // Plus tu es vieux (HP faible), plus ça fait mal
+        let bonus = hero.hp / hero.maxHp < 0.3 ? 1.5 : 1;
+        return Math.floor(15 * bonus);
       }
     },
     {
       name: "Suppression APL",
-      damage: 10,
+      baseDamage: 10,
       img: "macron3.png",
       effect: () => {
         if (redWineCount > 0) {
           redWineCount--;
+          updateRedWineDisplay();
           addLog("🏚️ Il t’a piqué une bouteille de vin rouge !");
+        } else {
+          addLog("🏚️ Tu n'avais plus rien, Macron t'humilie publiquement !");
         }
+      },
+      getDamage: () => {
+        // Si tu n'as plus de bouteilles, il te fout 5 de dégâts psychologiques
+        return redWineCount === 0 ? 15 : 10;
       }
     },
     {
       name: "Augmentation CSG",
-      damage: 12,
+      baseDamage: 12,
       img: "macron4.png",
       effect: () => {
-        addLog("📈 La CSG t'affaiblit !");
+        addLog("📈 Tu subis une taxe continue !");
         setTimeout(() => {
-          hero.hp -= 5;
-          addLog("💸 La CSG continue de te saigner (-5 HP)");
-          updateUI();
+          if (!isGameOver) {
+            hero.hp -= 5;
+            addLog("💸 La CSG continue de te saigner (-5 HP)");
+            updateUI();
+          }
         }, 3000);
+      },
+      getDamage: () => {
+        // Dégâts boostés si ton XP est proche d'un level up (rage fiscale)
+        let bonus = xp >= xpToNextLevel - 10 ? 1.5 : 1;
+        return Math.floor(12 * bonus);
       }
     },
     {
       name: "49.3 Ultime",
-      damage: 40,
+      baseDamage: 30,
       img: "macron5.png",
-      effect: () => addLog("⚡ Coup de massue législatif avec le 49.3 !")
+      effect: () => {
+        addLog("⚡ Coup de massue législatif ! 49.3 utilisé !");
+      },
+      getDamage: () => {
+        // Si Macron est en dessous de 50% de HP, il tape plus fort : panique à l'Élysée !
+        let bonus = monster.hp / monster.maxHp < 0.5 ? 1.5 : 1;
+        return Math.floor(40 * bonus);
+      }
     },
     {
       name: "Conférence de presse",
-      damage: 0,
+      baseDamage: 0,
       img: "macron8.png",
       effect: () => {
         monster.hp = Math.min(monster.maxHp, monster.hp + 30);
         addLog("🎙️ Macron se soigne en parlant : +30 HP !");
-      }
+        updateUI();
+      },
+      getDamage: () => 0 // Pas de dégâts
     }
   ];
 
+  // Sélection de l'action
   const action = attackOptions[Math.floor(Math.random() * attackOptions.length)];
   monsterSprite.src = `assets/images/macron/${action.img}`;
 
-  let damage = action.damage;
+  // Calcul des dégâts
+  let damage = typeof action.getDamage === 'function' ? action.getDamage() : action.baseDamage;
+
+  // Gestion de la défense du héros
   if (hero.defending) {
     damage -= hero.defense;
     hero.defending = false;
   }
+
+  // Appliquer le minimum 0
   damage = Math.max(0, damage);
+
+  // Appliquer les dégâts
   hero.hp -= damage;
 
+  // Exécuter l'effet spécifique
   action.effect();
 
+  // Effet sonore et animation
   sounds.hit.play();
   heroSprite.classList.add('shake');
   setTimeout(() => heroSprite.classList.remove('shake'), 300);
 
+  // Affichage dans le log
   addLog(`👹 ${currentMonster.name} utilise "${action.name}" et inflige ${damage} dégâts !`);
 
+  // Vérification si le héros est mort
   if (hero.hp <= 0) {
     hero.hp = 0;
     sounds.lose.play();
     addLog(`💀 Tu es tombé au combat... Score final : ${score}`);
+
     disableButtons();
     playDeathAnimation();
+    defeat();
+    isGameOver = true;
   }
 
+  // Mise à jour de l'UI
   updateUI();
 }
+
+
+
 
 function disableButtons() {
   attackBtn.disabled = true;
   defendBtn.disabled = true;
   healBtn.disabled = true;
+  molotovButton.disabled = true;
   nextBtn.style.display = 'none';
 }
 
@@ -293,98 +425,7 @@ function newMonster() {
 // =======================
 // 🧠 IA DE MACRON
 // =======================
-function monsterAttack() {
-  const attackOptions = [
-    {
-      name: "Prélèvement à la source",
-      damage: 20,
-      img: "macron1.png",
-      effect: () => addLog("💸 Macron te ponctionne directement sur ton salaire !")
-    },
-    {
-      name: "Réforme des retraites",
-      damage: 15,
-      img: "macron2.png",
-      effect: () => {
-        hero.defense = Math.max(0, hero.defense - 2);
-        addLog("📉 Ta défense est réduite à cause de la réforme !");
-      }
-    },
-    {
-      name: "Suppression APL",
-      damage: 10,
-      img: "macron3.png",
-      effect: () => {
-        if (hero.potions > 0) {
-          hero.potions--;
-          addLog("🏚️ Il t’a volé une potion d’APL !");
-        }
-      }
-    },
-    {
-      name: "Augmentation CSG",
-      damage: 12,
-      img: "macron4.png",
-      effect: () => {
-        addLog("📈 Tu subis une taxe continue !");
-        setTimeout(() => {
-          hero.hp -= 5;
-          addLog("💸 La CSG continue de te saigner (-5 HP)");
-          updateUI();
-        }, 3000);
-      }
-    },
-    {
-      name: "49.3 Ultime",
-      damage: 40,
-      img: "macron5.png",
-      effect: () => addLog("⚡ Coup de massue législatif ! 49.3 utilisé !")
-    },
-    {
-      name: "Conférence de presse",
-      damage: 0,
-      img: "macron8.png",
-      effect: () => {
-        monster.hp = Math.min(monster.maxHp, monster.hp + 30);
-        addLog("🎙️ Macron se soigne en parlant : +30 HP !");
-      }
-    }
-  ];
 
-  // Macron choisit aléatoirement son attaque
-  const action = attackOptions[Math.floor(Math.random() * attackOptions.length)];
-
-  // Affichage et mise à jour
-  monsterSprite.src = `assets/images/macron/${action.img}`;
-
-  let damage = action.damage;
-  if (hero.defending) {
-    damage -= hero.defense;
-    hero.defending = false;
-  }
-  damage = Math.max(0, damage);
-  hero.hp -= damage;
-
-  // Effet spécial de l'attaque
-  action.effect();
-
-  sounds.hit.play();
-  heroSprite.classList.add('shake');
-  setTimeout(() => heroSprite.classList.remove('shake'), 300);
-
-  addLog(`👹 ${currentMonster.name} utilise "${action.name}" et inflige ${damage} dégâts !`);
-
-  if (hero.hp <= 0) {
-    hero.hp = 0;
-    sounds.lose.play();
-    addLog(`💀 Tu as été écrasé par le capitalisme... Score final : ${score}`);
-
-    disableButtons();
-    playDeathAnimation();
-  }
-
-  updateUI();
-}
 
 
 // =======================
@@ -441,7 +482,7 @@ function updateXPUI() {
   document.getElementById('xp-text').textContent = `XP: ${xp} / ${xpToNextLevel}`;
 }
 
-document.getElementById('heal-btn').addEventListener('click', () => {
+/*document.getElementById('heal-btn').addEventListener('click', () => {
   if (redWineCount > 0) {
     let healAmount = 30; // Valeur de soin à ajuster si besoin
     heroHealth += healAmount;
@@ -457,7 +498,7 @@ document.getElementById('heal-btn').addEventListener('click', () => {
   } else {
     addLog(`❌ Plus de Bouteilles de Rouge !`);
   }
-});
+});*/
 
 
 // =======================
@@ -572,7 +613,10 @@ function startIdleAnimation() {
 // =======================
 // 🎮 EVENTS LISTENERS
 // =======================
+
+
 attackBtn.addEventListener('click', () => {
+  if (isGameOver) return;
   playAttack1Animation();
   lancerDePave();
 });
@@ -581,39 +625,78 @@ attackBtn.addEventListener('click', () => {
 const molotovButton = document.getElementById('molotovButton');
 
 molotovButton.addEventListener('click', () => {
-     // ✅ L'animation
-  cocktailMolotov();
-  if (redWineCount > 0) {
-    playMolotovAnimation();
-  }
+  if (isGameOver) return; // Protection
+  cocktailMolotov(); // Il va gérer tout
 
 });
 
+
+
 document.getElementById('heal-btn').addEventListener('click', () => {
-  if (redWineCount > 0) {
-    heroHealth += 30;
-    if (heroHealth > heroMaxHealth) heroHealth = heroMaxHealth;
-
-    redWineCount--;
-    addLog(`🍷 Tu bois une Bouteille de Rouge et récupères 30 HP !`);
-
-    updateRedWineDisplay();
-    updateStats();
-    monsterTurn();
-  } else {
-    addLog(`❌ Plus de Bouteilles de Rouge !`);
-  }
+  if (isGameOver) return;
+  bouteilleDeRouge();
 });
 
 
 defendBtn.addEventListener('click', () => {
+  if (isGameOver) return;
   playBlockAnimation();
   arretMaladie();
 });
 
-healBtn.addEventListener('click', () => {
-  bouteilleDeRouge();
-});
+
+
+function victory() {
+  isGameOver = true;
+  document.getElementById("victoryModal").style.display = "flex";
+}
+
+function defeat() {
+  if (isGameOver) return; // Pour éviter plusieurs appels
+  isGameOver = true;
+  disableButtons();
+  playDeathAnimation();
+  document.getElementById("defeatModal").style.display = "flex";
+}
+
+
+function restartGame() {
+  location.reload();
+}
+
+
+function addLog(message) {
+  const log = document.getElementById('log');
+  const newLog = document.createElement('p');
+  newLog.textContent = message;
+  log.appendChild(newLog);
+  log.scrollTop = log.scrollHeight;   // <-- Scroll auto
+}
+
+function checkVictoryOrDefeat() {
+  if (monster.hp <= 0) {
+    showVictoryScreen();
+  } else if (hero.hp <= 0) {
+    showDefeatScreen();
+  }
+}
+
+function showVictoryScreen() {
+  document.getElementById("victory-screen").classList.remove("hidden");
+}
+
+function showDefeatScreen() {
+  document.getElementById("defeat-screen").classList.remove("hidden");
+}
+
+function hideEndScreens() {
+  document.getElementById("victory-screen").classList.add("hidden");
+  document.getElementById("defeat-screen").classList.add("hidden");
+}
+
+
+
+
 
 
 // =======================

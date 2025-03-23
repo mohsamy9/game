@@ -1,158 +1,274 @@
-body {
+/* ========== GLOBAL RESET ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Bloque tout scroll */
     font-family: 'Press Start 2P', cursive;
-    background: radial-gradient(circle at top, #1e1e1e 0%, #121212 100%);
-    color: #f5f5f5;
+    background-color: #222;
+    color: #fff;
+  }
+  
+  /* ========== CONTAINER PRINCIPAL ========== */
+  body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    margin: 0;
-  }
-  
-  h1 {
-    font-size: 1.8em;
-    color: #ffcc00;
-    text-shadow: 2px 2px #000;
+    justify-content: flex-start;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
   }
   
   .container {
-    background-color: rgba(30, 30, 30, 0.9);
-    padding: 20px;
+    background-color: #1a1a1a;
     border-radius: 15px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.7);
-    border: 2px solid #444;
+    padding: 15px;
+    width: 100%;
+    max-width: 400px;
+    height: calc(100vh - 60px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
   }
   
+  /* ========== TITRE ========== */
+  h1 {
+    
+
+    
+  color: red;
+  text-align: center;
+  margin: 10px 0;
+
+  /* Ce qui compte : */
+  font-size: clamp(16px, 5vw, 40px); /* 5vw ajuste selon largeur écran */
+  white-space: nowrap; /* Sur une seule ligne */
+  overflow: hidden; /* Empêche le débordement */
+  text-overflow: ellipsis; /* Ajoute ... si y'a pas de place */
+
+  width: 100%;
+  box-sizing: border-box;
+  }
+
+  
+  
+  /* ========== STATS & SPRITES ========== */
   .stats {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    margin-bottom: 10px;
   }
   
   .hero, .monster {
-    width: 45%;
+    width: 48%;
+    text-align: center;
+  }
+  
+  .hero h3, .monster h3 {
+    font-size: 0.8em;
     text-align: center;
   }
   
   .sprite {
-    width: 120px;
-    height: 120px;
-    image-rendering: pixelated;
+    width: 80px;
+    height: 80px;
+    margin: 5px 0;
   }
   
+  /* ========== BARRES DE VIE ========== */
   .hp-bar {
-    background: #444;
     width: 100%;
-    height: 15px;
+    height: 10px;
+    background-color: #555;
     border-radius: 5px;
-    margin-top: 8px;
-    overflow: hidden;
+    margin: 5px 0;
   }
   
   .hp-fill {
     height: 100%;
     border-radius: 5px;
-    transition: width 0.3s;
   }
   
-  .hero .hp-fill {
-    background: #00ff99; /* Vert émeraude pour le héros */
+  #hero-hp-fill {
+    background-color: #00ff00;
   }
   
-  .monster .hp-fill {
-    background: #ff3333; /* Rouge sang pour les monstres */
+  #monster-hp-fill {
+    background-color: #ff0000;
+  }
+  
+  /* ========== COMPTEUR DE BOUTEILLES ========== */
+  #red-wine-counter {
+    font-size: 1.2em;
+    margin: 15px 0;
+    text-align: center;
+  }
+  
+  /* ========== BOITE DE DIALOGUE ========== */
+  #log {
+    flex-grow: 1;
+    background-color: #111;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #444;
+    font-size: 0.7em;
+    line-height: 1.4em;
+    overflow-y: auto;
+    height: 200px;
+    margin-bottom: 10px;
+  }
+  
+  #log p {
+    margin: 5px 0;
+    white-space: pre-wrap;
+    text-align: center;
+  }
+  
+  /* ========== ACTIONS ========== */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
   }
   
   .actions button {
-    background-color: #ff3333;
-    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    background-color: #e74c3c;
     border: none;
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 1em;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    transition: transform 0.2s, background 0.3s;
-  }
-
-  .inventory {
-    display: flex;
-    flex-wrap: wrap;
-    background-color: #1c1c1c;
     padding: 10px;
-    border-radius: 10px;
-    margin-top: 10px;
-    gap: 10px;
-  }
-  
-  .inventory-item {
-    background-color: #333;
     color: #fff;
-    padding: 5px 10px;
+    font-size: 0.65em;
     border-radius: 5px;
-    font-size: 0.7em;
-    border: 1px solid #666;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: center;
   }
-  
-
-  .xp-bar-container {
-    background: #444;
-    width: 100%;
-    height: 15px;
-    border-radius: 5px;
-    margin: 10px 0;
-    overflow: hidden;
-  }
-  
-  .xp-bar {
-    background: #00ffff;
-    height: 100%;
-    width: 0%;
-    transition: width 0.3s;
-  }
-  
   
   .actions button:hover {
-    transform: scale(1.1);
-    background-color: #cc0000;
+    background-color: #c0392b;
   }
   
-  #next-btn {
-    background-color: #ffaa00;
+  .actions button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
   }
   
-  #next-btn:hover {
-    background-color: #ffcc00;
-  }
-  
-  .log {
-    background-color: #1c1c1c;
-    color: #f5f5f5;
-    padding: 10px;
-    margin-top: 20px;
-    height: 150px;
-    overflow-y: auto;
-    font-size: 0.8em;
+  /* ========== POPUPS VICTOIRE / DEFAITE ========== */
+  #victory-screen, #defeat-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1a1a1a;
+    padding: 20px;
     border-radius: 10px;
-    border: 1px solid #444;
+    border: 2px solid #fff;
+    color: #fff;
+    text-align: center;
+    width: 80%;
+    max-width: 300px;
+    display: none;
+    z-index: 10;
   }
   
-  .log p {
-    margin: 5px 0;
+  #victory-screen.show, #defeat-screen.show {
+    display: block;
   }
   
-  .shake {
-    animation: shake 0.3s;
+  #victory-screen h2, #defeat-screen h2 {
+    color: #fff;
+    font-size: 1.2em;
+    margin-bottom: 10px;
   }
   
-  @keyframes shake {
-    0% { transform: translateX(0px); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0px); }
+  #victory-screen p, #defeat-screen p {
+    font-size: 0.8em;
+    margin-bottom: 10px;
+  }
+  
+  #victory-screen button, #defeat-screen button {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #e74c3c;
+    border: none;
+    padding: 8px 10px;
+    color: #fff;
+    font-size: 0.7em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  #victory-screen button:hover, #defeat-screen button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* ========== RESPONSIVE ========== */
+  @media screen and (max-width: 480px) {
+    .container {
+      max-width: 100%;
+      height: 100vh;
+      border-radius: 0;
+    }
+  
+    h1 {
+      font-size: 1.1em;
+    }
+  
+    .sprite {
+      width: 60px;
+      height: 60px;
+    }
+  
+    #red-wine-counter {
+      font-size: 1em;
+    }
+}
+
+.modal-content button,
+.restart-btn {
+  font-family: 'Press Start 2P', cursive;
+  background-color: #e74c3c;
+  border: none;
+  padding: 10px 20px;
+  color: #fff;
+  font-size: 0.65em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-content button:hover,
+.restart-btn:hover {
+  background-color: #c0392b;
+}
+
+.modal-content {
+    text-align: center;
+  }
+  
+  /* Ajouter dans le CSS */
+.heal-effect {
+    animation: pulseHeal 0.5s ease;
+  }
+  
+  @keyframes pulseHeal {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
   

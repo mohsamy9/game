@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,11 +9,11 @@
 </head>
 
 <body>
-    <h1><span style="color: red;">⚒️ Macron Révolution ⚒️</span></h1>
-    
-    
-    
+  <h1><span style="color: red;">⚒️ Macron Révolution ⚒️</span></h1>
+
   <div class="container">
+
+    <!-- Zone de combat -->
     <div class="stats">
       <div class="hero">
         <h3>Jean Moulin 2.0</h3>
@@ -22,47 +21,68 @@
         <div id="hero-hp">HP: 100/100</div>
         <div class="hp-bar"><div id="hero-hp-fill" class="hp-fill"></div></div>
       </div>
+      
       <div class="monster">
-        <h3 id="monster-name">👾 Monstre</h3>
-        <img src="assets/images/monster1.png" alt="Monster" class="sprite" id="monster-sprite"/>
+        <h3 id="monster-name">Emmanuel Macron</h3>
+        <img src="assets/images/macron.png" alt="Macron" class="sprite" id="monster-sprite"/>
         <div id="monster-hp">HP: 100/100</div>
         <div class="hp-bar"><div id="monster-hp-fill" class="hp-fill"></div></div>
       </div>
     </div>
 
+    <!-- Inventaire simplifié -->
     <div id="inventory">
-        <h2>🍷 Bouteilles de Rouge : <span id="red-wine-count">3</span></h2>
-      </div>
-      
-      
-      
-      
-
-    <div class="xp-bar-container">
-        <div id="xp-bar" class="xp-bar"></div>
-      </div>
-      <p id="xp-text">XP: 0 / 100</p>
-
-      
-
-      
-
-    <div class="actions">
-        <button id="attack-btn">🧱 Lancer de Pavé</button>
-        <button id="molotovButton">Cocktail Molotov</button>
-
-        <button id="defend-btn">🏥 Arrêt Maladie</button>
-        <button id="heal-btn">🍷 Bouteille de Rouge</button>
-        <button id="next-btn" style="display:none">➡️ Prochain Combat</button>
-        
+      <h2>🍷 Bouteilles de Rouge : <span id="red-wine-count">3</span></h2>
     </div>
 
+    <!-- Boîte de dialogue (remontée en haut des actions) -->
     <div class="log" id="log">
       <p>Le combat commence !</p>
     </div>
+
+    <!-- Boutons d'action -->
+    <div class="actions">
+      <button id="attack-btn">🧱 Lancer de Pavé</button>
+      <button id="molotovButton">🔥 Cocktail Molotov</button>
+      <button id="defend-btn">🏥 Arrêt Maladie</button>
+      <button id="heal-btn">🍷 Bouteille de Rouge</button>
+      <button id="next-btn" style="display:none">➡️ Prochain Combat</button>
+    </div>
+
+    <!-- Modale de défaite -->
+    <div id="defeatModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <h2>💀 Tu es tombé au combat !</h2>
+        <p>Macron a écrasé la révolte... mais la lutte continue !</p>
+        <button onclick="restartGame()">Recommencer</button>
+      </div>
+    </div>
+
+    <!-- Modale de victoire -->
+    <div id="victoryModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <h2>🎉 Victoire Populaire !</h2>
+        <p>Le régime a été renversé ! Vive la République et vive la France !</p>
+        <button onclick="restartGame()">Rejouer</button>
+      </div>
+    </div>
+
   </div>
 
+
+  <!-- Modale de défaite -->
+<div id="defeatModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h2>💀 Tu es tombé au combat !</h2>
+      <p>Macron a écrasé la révolte... mais la lutte continue !</p>
+      <button class="restart-btn" onclick="restartGame()">Recommencer</button>
+    </div>
+  </div>
+  
+  <!-- Musique de fond -->
   <audio id="bg-music" src="assets/sounds/music.mp3" loop autoplay></audio>
+  
+  <!-- Script principal -->
   <script src="js/game.js"></script>
 </body>
 </html>
