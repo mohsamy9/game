@@ -258,12 +258,12 @@ function monsterAttack() {
       getDamage: () => {
         // Peut faire 10 à 30% de dégâts en plus selon ton nombre de bouteilles
         let bonus = redWineCount > 5 ? 1.3 : 1.1;
-        return Math.floor(20 * bonus);
+        return Math.floor(15 * bonus);
       }
     },
     {
       name: "Réforme des retraites",
-      baseDamage: 15,
+      baseDamage: 13,
       img: "macron2.png",
       effect: () => {
         hero.defense = Math.max(0, hero.defense - 2);
@@ -272,7 +272,7 @@ function monsterAttack() {
       getDamage: () => {
         // Plus tu es vieux (HP faible), plus ça fait mal
         let bonus = hero.hp / hero.maxHp < 0.3 ? 1.5 : 1;
-        return Math.floor(15 * bonus);
+        return Math.floor(13 * bonus);
       }
     },
     {
